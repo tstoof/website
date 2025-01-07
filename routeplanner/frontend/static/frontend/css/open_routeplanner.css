@@ -1,0 +1,98 @@
+/* Base styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f9fc;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+h1 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Map container */
+#map {
+    width: 80%;
+    height: 500px;
+    border: 2px solid #2c3e50;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}   
+
+/* Coordinates section */
+h3 {
+    font-size: 1.4rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1rem;
+    color: #34495e;
+    margin: 5px 0;
+}
+
+/* Link to frontpage */
+a, button {
+    display: inline-block;
+    text-decoration: none;
+    color: #fff;
+    background-color: #3498db;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+a:hover {
+    background-color: #2980b9;
+}
+
+button {
+    background-color: #30a553;
+}
+
+button:hover {
+    background-color: #057718;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #map {
+        width: 95%;
+        height: 400px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h3, p {
+        font-size: 0.9rem;
+    }
+
+    a {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+
+    button {
+        width: 180px;
+        font-size: 1em;
+    }
+}
+
+#routeName {
+    margin-top:2vh;
+    margin-bottom: -2vh;;
+}

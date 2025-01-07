@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Route Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/open_routeplanner.css' %}">
+
+    <!-- Include Leaflet.js JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+</head>
+<body>
+    <h1>Welcome to your Personal Route Planner</h1>
+    <p>You can plan your routes and save them here!</p>
+
+    <h1>Drag and drop the two markers to select your begin and end points!</h1>
+
+    <div id="map"></div>
+
+    <h3>Coordinates:</h3>
+    <p>Start: <span id="marker1-coordinates">Not set</span></p>
+    <p>End: <span id="marker2-coordinates">Not set</span></p>
+    <button onclick="updateCoordinates()">Plan your route</button>
+    <input type="text" id="routeName" placeholder="Enter route name">
+    <button onclick="save_route()">Save your route</button>
+    <button onclick="downloadLineAsGPX()">Download Route (.gpx)</button>
+    <button onclick="loadAndVisualizeRoutes()">Visualize Loaded Routes</button> <!-- New button -->
+    <a href="{% url 'index' %}">Go back to frontpage</a>
+
+    <script>
+        // Initialize the map and set its view to a specific latitude and longitude
+        var map = L.map('map').setView([52.073, 5.13], 8); // Example coordinates
+    
+        // Set the OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    
+        // Initialize two markers with their initial positions
+        var marker1 = L.marker([52.145, 5.24], { draggable: true }).addTo(map)
+            .bindPopup('Start')
+            .openPopup();
+    
+        var marker2 = L.marker([52.126, 5.68], { draggable: true }).addTo(map)
+            .bindPopup('End')
+            .openPopup();
+    
+        var lineLayer = null;
+    
+        // Function to update the coordinates of both markers
+        function updateCoordinates() {
+            var lat1 = marker1.getLatLng().lat.toFixed(5);
+            var lng1 = marker1.getLatLng().lng.toFixed(5);
+            var lat2 = marker2.getLatLng().lat.toFixed(5);
+            var lng2 = marker2.getLatLng().lng.toFixed(5);
+    
+            // Display the coordinates of the two markers
+            document.getElementById('marker1-coordinates').textContent = `Latitude: ${lat1}, Longitude: ${lng1}`;
+            document.getElementById('marker2-coordinates').textContent = `Latitude: ${lat2}, Longitude: ${lng2}`;
+    
+            // Call the function to send the coordinates to the backend via POST
+            sendCoordinatesToAPI(lat1, lng1, lat2, lng2);
+        }
+    
+        // Function to send the coordinates to the backend API using a POST request
+        function sendCoordinatesToAPI(lat1, lng1, lat2, lng2) {
+            fetch('/api/coordinates/', {  // The URL of your Django API endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for security
+                },
+                body: JSON.stringify({
+                    marker1: { lat: lat1, lng: lng1 },
+                    marker2: { lat: lat2, lng: lng2 }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    const lineCoordinates = data.line_data.coordinates;
+    
+                    // Clear the existing line from the map
+                    if (lineLayer) {
+                        map.removeLayer(lineLayer);
+                    }
+    
+                    // Add the new line to the map
+                    lineLayer = L.polyline(
+                        lineCoordinates.map(coord => [coord[1], coord[0]]), // Leaflet expects [lat, lng]
+                        { color: 'blue', weight: 4 }
+                    ).addTo(map);
+    
+                    map.fitBounds(lineLayer.getBounds()); // Adjust the map to fit the line                    
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    
+        // Function to download the line as a CSV file
+        function downloadLineAsGPX() {
+            if (!lineLayer || lineLayer.getLatLngs().length === 0) {
+                alert("No line data available to download!");
+                return;
+            }
+    
+            // Get the coordinates of the polyline (lineLayer) as an array of lat/lng pairs
+            let coordinates = lineLayer.getLatLngs();
+    
+            // Start building the GPX XML string
+            let gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+            <gpx version="1.1" creator="Leaflet Map" xmlns="http://www.topografix.com/GPX/1/1">
+                <rte>`; // Start the route element
+    
+            // Add each coordinate as a <rtept> element in the GPX file
+            coordinates.forEach(coord => {
+                gpxContent += `
+                    <rtept lat="${coord.lat}" lon="${coord.lng}">
+                        <name>Point</name>
+                    </rtept>`;
+            });
+    
+            // Close the <rte> and <gpx> elements
+            gpxContent += `
+                </rte>
+            </gpx>`;
+    
+            // Create a Blob with the GPX content and download it
+            const blob = new Blob([gpxContent], { type: 'application/gpx+xml;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "route_coordinates.gpx");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    
+        // Function to convert latlngs to a more suitable format for MongoDB
+        function getLineData() {
+            if (!lineLayer) {
+                alert('No route data available to save');
+                return []; // Return an empty array if lineLayer is null
+            }
+            var latlngs = lineLayer.getLatLngs();
+            return latlngs.map(function(latlng) {
+                return { lat: latlng.lat, lng: latlng.lng };
+            });
+        }
+    
+        function save_route() {
+            var routeName = document.getElementById("routeName").value;
+            if (!routeName) {
+                alert('Please enter a route name');
+                return;
+            }
+    
+            var routeData = getLineData();
+            if (routeData.length === 0) {
+                alert('No route data available to save');
+                return;
+            }
+    
+            // Send route data to the backend
+            fetch('/save_route/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for security
+                },
+                body: JSON.stringify({ name: routeName, data: routeData }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Route saved successfully!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the route.');
+            });
+        }
+    
+        // Function to load and visualize routes on the map
+        // Helper function to generate random color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function loadAndVisualizeRoutes() {
+            fetch('/load_routes/')  // The URL of the `load_routes` endpoint
+                .then(response => response.json())
+                .then(data => {
+                    if (data.routes && data.routes.length > 0) {
+                        console.log('Loaded Routes:', data.routes);
+                        // Clear any existing lines
+                        if (lineLayer) {
+                            map.removeLayer(lineLayer);
+                        }
+                        
+                        // Add each loaded route to the map with a unique random color
+                        data.routes.forEach(route => {
+                            let routeCoordinates = route.data.map(coord => [coord.lat, coord.lng]);
+
+                            // Generate a random color for each route
+                            let routeColor = getRandomColor();
+
+                            let newRouteLayer = L.polyline(routeCoordinates, { color: routeColor, weight: 4 }).addTo(map);
+                            map.fitBounds(newRouteLayer.getBounds());
+                        });
+                    } else {
+                        alert('No routes found or error loading routes!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+    
+    </script>
+    
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+Django>=5.1,<5.2
+gunicorn>=23,<24
+dj-database-url>=2,<3
+whitenoise[brotli]>=6,<7
+pytest==7.2.0
+pytest-django==4.5.2
+django-environ==0.8.0
+python-decouple==3.8
+openrouteservice==2.3.3
+pymongo[srv]
+postgresql 
+postgresql-contrib
+psycopg
+# python3-dev 
+# libpq-dev 
+# gcc

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Route Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/open_routeplanner.css' %}">
+
+    <!-- Include Leaflet.js JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+</head>
+<body>
+    <h1>Welcome to the Open Route Planner</h1>
+    <p>This version is available to everyone. Here, you can plan routes without logging in!</p>
+
+    <h1>Drag and drop the two markers to select your begin and end points!</h1>
+
+    <div id="map"></div>
+
+    <h3>Coordinates:</h3>
+    <p>Start: <span id="marker1-coordinates">Not set</span></p>
+    <p>End: <span id="marker2-coordinates">Not set</span></p>
+    <button onclick="updateCoordinates()">Plan your route</button>
+    <a href="{% url 'index' %}">Go back to frontpage</a>
+
+
+
+    <script>
+       // Initialize the map and set its view to a specific latitude and longitude
+        var map = L.map('map').setView([52.073, 5.13], 8); // Example coordinates
+
+        // Set the OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Initialize two markers with their initial positions
+        var marker1 = L.marker([52.145, 5.24], { draggable: true }).addTo(map)
+            .bindPopup('Start')
+            .openPopup();
+
+        var marker2 = L.marker([52.126, 5.68], { draggable: true }).addTo(map)
+            .bindPopup('End')
+            .openPopup();
+  
+        var lineLayer = null;
+        var route = null;
+
+        // Function to update the coordinates of both markers
+        function updateCoordinates() {
+            var lat1 = marker1.getLatLng().lat.toFixed(5);
+            var lng1 = marker1.getLatLng().lng.toFixed(5);
+            var lat2 = marker2.getLatLng().lat.toFixed(5);
+            var lng2 = marker2.getLatLng().lng.toFixed(5);
+
+            // Display the coordinates of the two markers
+            document.getElementById('marker1-coordinates').textContent = `Latitude: ${lat1}, Longitude: ${lng1}`;
+            document.getElementById('marker2-coordinates').textContent = `Latitude: ${lat2}, Longitude: ${lng2}`;
+
+            // Call the function to send the coordinates to the backend via POST
+            sendCoordinatesToAPI(lat1, lng1, lat2, lng2);
+        }
+
+        // Function to send the coordinates to the backend API using a POST request
+        function sendCoordinatesToAPI(lat1, lng1, lat2, lng2) {
+            fetch('/api/coordinates/', {  // The URL of your Django API endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for security
+                },
+                body: JSON.stringify({
+                    marker1: { lat: lat1, lng: lng1 },
+                    marker2: { lat: lat2, lng: lng2 }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    const lineCoordinates = data.line_data.coordinates;
+
+                    // Clear the existing line from the map
+                    if (lineLayer) {
+                        map.removeLayer(lineLayer);
+                    }
+
+                    // Add the new line to the map
+                    lineLayer = L.polyline(
+                        lineCoordinates.map(coord => [coord[1], coord[0]]), // Leaflet expects [lat, lng]
+                        { color: 'blue', weight: 4 }
+                    ).addTo(map);
+
+                    map.fitBounds(lineLayer.getBounds()); // Adjust the map to fit the line                    
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Function to convert latlngs to a more suitable format for MongoDB
+        function getLineData() {
+            var latlngs = lineLayer.getLatLngs();
+            return latlngs.map(function(latlng) {
+                return { lat: latlng.lat, lng: latlng.lng };
+            });
+        }
+
+    </script>
+
+</body>
+</html>

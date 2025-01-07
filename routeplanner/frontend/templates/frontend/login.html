@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Route Planner</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/login.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Username Field -->
+            <input type="text" name="username" placeholder="Username" value="{{ form.username.value|default:'' }}" required>
+
+            <!-- Password Field -->
+            <input type="password" name="password" placeholder="Password" required>
+
+            <!-- Display form errors (e.g., invalid username or password) -->
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <!-- Submit Button -->
+            <button type="submit">Login</button>
+        </form>
+
+        <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+        <p><a href="{% url 'index' %}">Go back to Home</a></p>
+
+        <div class="reset-password">
+            <p>Forgot your password? <a href="{% url 'reset_password' %}">Reset it using the secret question</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
