@@ -27,7 +27,7 @@ MONGO_URI = "mongodb+srv://tamarastoof:" + password + "@website.qtybm.mongodb.ne
 MONGO_DB_NAME = "hikingRoutes"
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['planyourhike.onrender.com', 'www.planyourhike.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
