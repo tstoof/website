@@ -8,9 +8,4 @@ django-environ==0.8.0
 python-decouple==3.8
 openrouteservice==2.3.3
 pymongo[srv]
-postgresql 
-postgresql-contrib
-psycopg
-# python3-dev 
-# libpq-dev 
-# gcc
+psycopg2>=2.9,<3.0
