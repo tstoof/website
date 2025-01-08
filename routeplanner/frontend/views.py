@@ -31,7 +31,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('personal_home')  # Redirect to route planner after login
+            return redirect('index')  # Redirect to route planner after login
     else:
         form = AuthenticationForm()
     return render(request, 'frontend/login.html', {'form': form})
@@ -67,7 +67,7 @@ def receive_coordinates(request):
 @login_required
 def personal_home(request):
     # The request.user will give the logged-in user object
-    return render(request, 'frontend/personal_home.html', {'username': request.user.username})
+    return render(request, 'frontend/index.html', {'username': request.user.username})
 
 def logout_view(request):
     if request.method == 'POST':
