@@ -14,8 +14,13 @@
         <div class="button-group">
             <!-- Logged-in users will see the 'Personal Route Planner' option -->
             {% if user.is_authenticated %}
-                <a href="{% url 'personal_home' %}" class="link-button">Personal Route Planner</a>
+                <a href="{% url 'personal_routeplanner' %}" class="link-button">Personal Route Planner</a>
                 <a href="{% url 'history' %}" class="link-button">History</a>
+                <form action="{% url 'logout' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+                <p><a href="{% url 'delete_account' %}">Delete Account</a></p>
             {% else %}
                 <!-- Non-logged-in users will have options to log in, sign up, or visit the open version -->
                 <a href="{% url 'login' %}" class="link-button">Login</a>
