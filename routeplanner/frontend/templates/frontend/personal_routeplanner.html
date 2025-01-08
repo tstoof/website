@@ -14,27 +14,30 @@
 
 </head>
 <body>
-    <h1>Welcome to your Personal Route Planner</h1>
-    <p>You can plan your routes and save them here!</p>
+    <div class="container">
 
-    <h1>Drag and drop the two markers to select your begin and end points!</h1>
+        <h1>Welcome to your Personal Route Planner</h1>
+        <p>You can plan your routes and save them here!</p>
 
-    <div id="map"></div>
+        <h1>Drag and drop the two markers to select your begin and end points!</h1>
 
-    <h3>Coordinates:</h3>
-    <p>Start: <span id="marker1-coordinates">Not set</span></p>
-    <p>End: <span id="marker2-coordinates">Not set</span></p>
+        <div id="map"></div>
 
-    <div class="route-form">
-        <input type="text" id="routeName" placeholder="Enter route name" />
-        <button onclick="updateCoordinates()">Plan your route</button>
-        <button onclick="save_route()">Save your route</button>
-        <button onclick="downloadLineAsGPX()">Download Route (.gpx)</button>
-        <button onclick="loadAndVisualizeRoutes()">Visualize Loaded Routes</button>
-    </div>
-    
-    <div class="footer">
-        <p><a href="{% url 'index' %}" style="color: #ffb3b3;">Go back to frontpage</a></p>
+        <h3>Coordinates:</h3>
+        <p>Start: <span id="marker1-coordinates">Not set</span></p>
+        <p>End: <span id="marker2-coordinates">Not set</span></p>
+
+        <div class="route-form">
+            <input type="text" id="routeName" placeholder="Enter route name" />
+            <button onclick="updateCoordinates()">Plan your route</button>
+            <button onclick="save_route()">Save your route</button>
+            <button onclick="downloadLineAsGPX()">Download Route (.gpx)</button>
+            <button onclick="loadAndVisualizeRoutes()">Visualize Loaded Routes</button>
+        </div>
+        
+        <div class="footer">
+            <p><a href="{% url 'index' %}" style="color: #ffb3b3;">Go back to frontpage</a></p>
+        </div>
     </div>
 
     <script>
