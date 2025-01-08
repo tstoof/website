@@ -9,8 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Route Planner</h1>
-        <p>Welcome, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}</p>
+        <h1>Welcome to Route Planner, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}</h1>
         <div class="button-group">
             <!-- Logged-in users will see the 'Personal Route Planner' option -->
             {% if user.is_authenticated %}

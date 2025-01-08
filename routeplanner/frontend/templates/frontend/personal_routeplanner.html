@@ -148,18 +148,7 @@
             document.body.removeChild(link);
         }
     
-        // Function to convert latlngs to a more suitable format for MongoDB
-        function getLineData() {
-            if (!lineLayer) {
-                alert('No route data available to save');
-                return []; // Return an empty array if lineLayer is null
-            }
-            var latlngs = lineLayer.getLatLngs();
-            return latlngs.map(function(latlng) {
-                return { lat: latlng.lat, lng: latlng.lng };
-            });
-        }
-    
+        // Function to save the route
         function save_route() {
             var routeName = document.getElementById("routeName").value;
             if (!routeName) {
