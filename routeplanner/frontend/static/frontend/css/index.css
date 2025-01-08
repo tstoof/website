@@ -1,80 +1,84 @@
-/* frontend/static/frontend/css/style.css */
-
-/* Global Styles */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: white;
     margin: 0;
     padding: 0;
-    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+/* Container Styling */
+.container {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 600px;
 }
 
 h1 {
-    color: #333;
-    text-align: center;
-    margin-top: 50px;
+    font-size: 3em;
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease-in;
 }
 
-/* Container for the form and options */
-.container {
-    width: 80%;
-    max-width: 900px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-}
-
+/* Button Group Styling */
 .button-group {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     gap: 15px;
-    margin-top: 30px;
+    margin: 20px 0;
 }
 
-/* Buttons */
-button, .link-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 15px 30px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    text-decoration: none; /* Remove underline from links */
-    transition: background-color 0.3s ease;
-    display: inline-block;
+/* Link Buttons Styling */
+.link-button {
+    background-color: #ff5c5c;
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2em;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-button:hover, .link-button:hover {
-    background-color: #0056b3;
+.link-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Link Styling for text-based links (e.g. Sign Up, Login) */
+/* Open Route Planner Link */
 p {
-    text-align: center;
-    font-size: 16px;
+    font-size: 1.1em;
+    margin-top: 20px;
+    color: #ffb3b3;
+    animation: fadeIn 2s ease-out;
 }
 
 p a {
-    color: #007bff;
+    color: #ffb3b3;
     text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
 }
 
 p a:hover {
-    text-decoration: underline;
+    color: #ffffff;
 }
 
-/* Add responsive design for smaller screens */
-@media (max-width: 768px) {
-    .container {
-        width: 90%;
-        padding: 15px;
-    }
+/* Animations */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
 
-    .button-group {
-        flex-direction: column;
-        gap: 10px;
-    }
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
