@@ -9,14 +9,14 @@
     <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/history.css' %}">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <!-- Add some styling for the map container -->
     <style>
         .map-container {
             width: 100%;
-            height: 400px;
+            height: 300px;
             margin-top: 20px;
-        }
+        }       
     </style>
+
 </head>
 <body>
     <div class="container">
@@ -118,39 +118,38 @@
 
         // Function to delete route
         function deleteRoute(routeId) {
-    if (confirm("Are you sure you want to delete this route?")) {
-        // Send AJAX request to delete the route
-        fetch(`/delete_route/${routeId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',  // Ensure CSRF token is passed correctly
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert("Route deleted successfully!");
+            if (confirm("Are you sure you want to delete this route?")) {
+                // Send AJAX request to delete the route
+                fetch(`/delete_route/${routeId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',  // Ensure CSRF token is passed correctly
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("Route deleted successfully!");
 
-                // Remove the route element from the page
-                const routeElement = document.getElementById("route-" + routeId);
-                if (routeElement) {
-                    routeElement.remove();  // Remove the route element from the DOM
-                }
-                location.reload()
-            } else {
-                // If the deletion wasn't successful, show an error message
-                alert("Error deleting route: " + data.error);
+                        // Remove the route element from the page
+                        const routeElement = document.getElementById("route-" + routeId);
+                        if (routeElement) {
+                            routeElement.remove();  // Remove the route element from the DOM
+                        }
+                        location.reload()
+                    } else {
+                        // If the deletion wasn't successful, show an error message
+                        alert("Error deleting route: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    // If there's an issue with the fetch request, show a generic error
+                    alert("An error occurred while deleting the route.");
+                    console.error('Error:', error);  // Log the error for debugging purposes
+                });
             }
-        })
-        .catch(error => {
-            // If there's an issue with the fetch request, show a generic error
-            alert("An error occurred while deleting the route.");
-            console.error('Error:', error);  // Log the error for debugging purposes
-        });
-    }
-}
-
+        }
     </script>
 </body>
 </html>
