@@ -1,4 +1,46 @@
-<div>
-    <p>history of user: {{ username }}</p>
-    <a href="{% url 'index' %}">Go back to Personal Page</a>
-</div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Route History</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/history.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Route History</h1>
+        
+        <div class="route-history">
+            <!-- Sample Route History Items -->
+            <div class="route-item">
+                <h3>Route from New York to Los Angeles</h3>
+                <p><strong>Date:</strong> January 5, 2025</p>
+                <p><strong>Distance:</strong> 2,450 miles</p>
+                <p><strong>Time Taken:</strong> 40 hours</p>
+                <div class="buttons">
+                    <a href="view_route.html" class="button">View Route</a>
+                    <a href="delete_route.html" class="button">Delete Route</a>
+                </div>
+            </div>
+
+            <div class="route-item">
+                <h3>Route from Chicago to Miami</h3>
+                <p><strong>Date:</strong> December 15, 2024</p>
+                <p><strong>Distance:</strong> 1,250 miles</p>
+                <p><strong>Time Taken:</strong> 20 hours</p>
+                <div class="buttons">
+                    <a href="view_route.html" class="button">View Route</a>
+                    <a href="delete_route.html" class="button">Delete Route</a>
+                </div>
+            </div>
+
+            <!-- More routes can be added here -->
+        </div>
+
+        <div class="footer">
+            <p>Need to add a new route? <a href="{% url 'personal_routeplanner' %}" style="color: #ffb3b3;">Go back to Personal Route Planner</a>.</p>
+        </div>
+    </div>
+</body>
+</html>

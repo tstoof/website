@@ -22,9 +22,9 @@ import os
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 ORS_API_KEY = config('ORS_API_KEY')
 
-password = quote_plus(config('DATABASE_KEY'))
-MONGO_URI = "mongodb+srv://tamarastoof:" + password + "@website.qtybm.mongodb.net/?retryWrites=true&w=majority&appName=website"
-MONGO_DB_NAME = "hikingRoutes"
+# password = quote_plus(config('DATABASE_KEY'))
+# MONGO_URI = "mongodb+srv://tamarastoof:" + password + "@website.qtybm.mongodb.net/?retryWrites=true&w=majority&appName=website"
+# MONGO_DB_NAME = "hikingRoutes"
 DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['planyourhike.onrender.com', 'www.planyourhike.onrender.com', '127.0.0.1', 'localhost']
