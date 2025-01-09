@@ -5,14 +5,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def say_hello_to_coordinates(coord1, coord2):
-    lat1, lng1 = coord1
-    lat2, lng2 = coord2
-
-    # Example: return a simple message with the coordinates
-    return f"Hello, your coordinates are: Marker 1 at ({lat1}, {lng1}), Marker 2 at ({lat2}, {lng2})"
-
-
 def create_straight_line_json(coord1, coord2, num_points=100):
     """
     Create a JSON object representing a straight line between two points.
@@ -69,10 +61,7 @@ def plan_route(coord1, coord2):
         # Decode the polyline
         route_geometry = route['routes'][0]['geometry']
         decoded_route = decode_polyline(route_geometry)
-        
-        # Log the decoded route
-        logger.info(f"Decoded route: {decoded_route}")
-        
+
         return decoded_route
     
     except openrouteservice.exceptions.ApiError as api_error:
@@ -88,37 +77,3 @@ def plan_route(coord1, coord2):
       
         logger.error("route=%s",str(client))
         return create_straight_line_json(coord1, coord2, num_points=100)  
-
-# def plan_route(coord1, coord2):
-#     try:    
-#         # Initialize the client with your API key
-#         client = openrouteservice.Client(key=config('ORS_API_KEY'))
-        
-#         # Get route between two coordinates
-#         route = client.directions(
-#             coordinates=[coord1, coord2],
-#             profile='foot-hiking',  # Options: 'cycling-regular', 'foot-walking', etc.
-#         )
-        
-#         # Decode the polyline
-#         route_geometry = route['routes'][0]['geometry']
-#         decoded_route = decode_polyline(route_geometry)
-        
-#         # Log the decoded route
-#         logger.info(f"Decoded route: {decoded_route}")
-        
-#         return decoded_route
-    
-#     except openrouteservice.exceptions.ApiError as api_error:
-#         # Handle API-specific errors
-#         logger.error("OpenRouteService API error occurred: %s", api_error)
-#         raise ValueError(f"OpenRouteService API error: {api_error}")
-    
-#     except Exception as e:
-#         # Fallback for any other unexpected exceptions
-#         logger.error("An unexpected error occurred: %s", str(e))
-#         # Initialize the client with your API key
-#         client = openrouteservice.Client(key=config('ORS_API_KEY'))
-      
-#         logger.error("route=%s",str(client))
-#         return create_straight_line_json(coord1, coord2, num_points=100)
