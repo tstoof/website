@@ -19,5 +19,6 @@ urlpatterns = [
     path('api/coordinates/', views.receive_coordinates, name='receive_coordinates'),
     path('save_route/', views.save_route, name='save_route'),
     path('load_routes/', views.load_routes, name='load_routes'),
-    # path('personal_routeplanner/load_route/<int:route_id>/', views.load_route, name='load_route'), # gets specific route
+    path('edit_route/<int:route_id>/', views.edit_route, name='edit_route'),
+    path('delete_route/<int:route_id>/', views.delete_route, name='delete_route'),
 ]

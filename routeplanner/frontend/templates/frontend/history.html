@@ -27,7 +27,8 @@
         </div>
 
         <div class="footer">
-            <p>Need to add a new route? <a href="personal_home.html" style="color: #ffb3b3;">Go back to Personal Route Planner</a>.</p>
+            <p>Need to add a new route? <a href="{% url 'personal_routeplanner' %}" style="color: #ffb3b3;">Go back to Personal Route Planner</a>.</p>
+            <p><a href="{% url 'index' %}" style="color: #ffb3b3;">Go back to homepage</a>.</p>
         </div>
     </div>
 
@@ -53,8 +54,10 @@
                             <p><strong>Date:</strong> ${formattedDate}</p>
                             <div class="map-container" id="map-${route.id}"></div> <!-- Map container for this route -->
                             <div class="buttons">
-                                <a href="view_route.html?route_id=${route.id}" class="button">View Route</a>
-                                <a href="delete_route.html?route_id=${route.id}" class="button">Delete Route</a>
+                                <!-- Edit Route Button -->
+                                <button class="button" onclick="editRoute(${route.id})">Edit Route</button>
+                                <!-- Delete Route Button -->
+                                <button class="button" onclick="deleteRoute(${route.id})">Delete Route</button>
                             </div>
                         `;
                         
@@ -82,6 +85,62 @@
             .catch(error => {
                 console.error('Error loading routes:', error);
             });
+
+        // Function to edit route
+        function editRoute(routeId) {
+            const newRouteName = prompt("Enter the new name for this route:");
+            if (newRouteName) {
+                // Send AJAX request to edit the route
+                fetch(`/edit_route/${routeId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        route_name: newRouteName,
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("Route updated successfully!");
+                        location.reload(); // Reload the page to see the updated route name
+                    } else {
+                        alert("Error updating route: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while updating the route.");
+                });
+            }
+        }
+
+        // Function to delete route
+        function deleteRoute(routeId) {
+            if (confirm("Are you sure you want to delete this route?")) {
+                // Send AJAX request to delete the route
+                fetch(`/delete_route/${routeId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("Route deleted successfully!");
+                        document.getElementById("route-" + routeId).remove(); // Remove the route element from the page
+                    } else {
+                        alert("Error deleting route: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while deleting the route.");
+                });
+            }
+        }
     </script>
 </body>
 </html>
