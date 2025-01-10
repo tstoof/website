@@ -70,6 +70,7 @@
                 <div class="form-group">
                     <label for="{{ secret_question_form.answer.id_for_label }}">Secret Answer:</label>
                     {{ secret_question_form.answer }}
+
                     {% if secret_question_form.answer.errors %}
                         <ul class="error-list">
                             {% for error in secret_question_form.answer.errors %}
@@ -131,6 +132,9 @@
                 // Check if the answer is at least 64 characters long
                 if (answer.length < 64) {
                     messages.push('Answer must be at least 64 characters long.');
+                }
+                else {
+                    feedback.innerHTML = 'Answer length is sufficient.';
                 }
 
                 secretAnswerFeedback.innerHTML = messages.join('<br>');

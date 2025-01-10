@@ -7,13 +7,6 @@ from django import forms
 from django.contrib.auth.forms import SetPasswordForm
 import re
 
-
-import re
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
@@ -71,7 +64,7 @@ class CustomUserCreationForm(UserCreationForm):
 class SecretQuestionForm(forms.Form):
     username = forms.CharField(max_length=255, required=True)
     question = forms.CharField(max_length=255, required=False)  # Only required for registration
-    answer = forms.CharField(max_length=255, required=True)
+    answer = forms.CharField(max_length=255, min_length=64, required=True)
     new_password1 = forms.CharField(label="New password", widget=forms.PasswordInput, required=False)  # Required for reset
     new_password2 = forms.CharField(label="Confirm new password", widget=forms.PasswordInput, required=False)
 
