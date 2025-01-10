@@ -21,4 +21,5 @@ urlpatterns = [
     path('load_routes/', views.load_routes, name='load_routes'),
     path('edit_route/<int:route_id>/', views.edit_route, name='edit_route'),
     path('delete_route/<int:route_id>/', views.delete_route, name='delete_route'),
+    path('locked_out/', views.locked_out_view, name='locked_out'),
 ]

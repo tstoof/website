@@ -281,3 +281,8 @@ def delete_route(request, route_id):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method. Use POST.'}, status=405)
+    
+
+
+def locked_out_view(request):
+    return render(request, 'locked_out.html')

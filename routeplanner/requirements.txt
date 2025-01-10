@@ -9,3 +9,4 @@ python-decouple==3.8
 openrouteservice==2.3.3
 pymongo[srv]
 psycopg
+django-axes
