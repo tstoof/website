@@ -132,10 +132,32 @@ class SecretQuestionForm(forms.Form):
 
 
 class ResetPasswordForm(SetPasswordForm):
-    """Form for setting a new password"""
-    new_password1 = forms.CharField(label="New password", widget=forms.PasswordInput)
-    new_password2 = forms.CharField(label="Confirm new password", widget=forms.PasswordInput)
+    """Form for setting a new password with validation rules"""
 
+    def clean_new_password1(self):
+        password = self.cleaned_data.get('new_password1')
 
+        # Ensure password meets the complexity requirements
+        if not re.fullmatch(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$', password):
+            raise ValidationError(
+                'Password must be at least 8 characters long, contain at least one uppercase letter, '
+                'one lowercase letter, one number, and one special character.'
+            )
+
+        # Prohibit reuse of username in the password
+        username = self.user.username.lower() if self.user else None
+        if username and username in password.lower():
+            raise ValidationError('Password must not contain your username.')
+
+        # Check for repeated characters
+        digits = [char for char in password if char.isdigit()]
+        letters = [char.lower() for char in password if char.isalpha()]
+
+        if len(digits) > 1 and len(set(digits)) == 1:
+            raise ValidationError('Password cannot consist of the same digit repeated.')
+        if letters and len(set(letters)) == 1:
+            raise ValidationError('Password cannot consist of the same letter repeated, ignoring case.')
+
+        return password
 
 

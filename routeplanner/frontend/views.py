@@ -120,17 +120,37 @@ def signup_view(request):
     })
 
 
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from .forms import ResetPasswordForm, SecretQuestionForm
+from .models import SecretQuestion
+
 def reset_password(request):
     secret_question = None
+    user = None
 
     if request.method == 'POST':
-        form = SecretQuestionForm(request.POST, is_registration=False)
+        form = ResetPasswordForm(request.user, request.POST)
+        secret_question_form = SecretQuestionForm(request.POST, is_registration=False)
 
-        if form.is_valid():
-            # Save the new password
-            form.save()
+        if form.is_valid() and secret_question_form.is_valid():
+            # Validate the secret answer
+            username = secret_question_form.cleaned_data.get('username')
+            answer = secret_question_form.cleaned_data.get('answer')
 
-            return redirect('login')
+            try:
+                user = User.objects.get(username=username)
+                secret_question = SecretQuestion.objects.get(user=user)
+                if secret_question.answer != answer:
+                    secret_question_form.add_error('answer', 'Incorrect answer to the secret question.')
+                else:
+                    # Save the new password
+                    form.user = user  # Assign the user to the password form
+                    form.save()
+                    return redirect('login')
+            except (User.DoesNotExist, SecretQuestion.DoesNotExist):
+                secret_question_form.add_error('username', 'Invalid username or secret question.')
+
     else:
         username = request.GET.get('username')
         if username:
@@ -140,15 +160,18 @@ def reset_password(request):
             except (User.DoesNotExist, SecretQuestion.DoesNotExist):
                 pass
 
-        form = SecretQuestionForm(initial={
+        form = ResetPasswordForm(None)
+        secret_question_form = SecretQuestionForm(initial={
             'username': username,
             'question': secret_question.question if secret_question else '',
         }, is_registration=False)
 
     return render(request, 'frontend/reset_password.html', {
         'form': form,
+        'secret_question_form': secret_question_form,
         'secret_question': secret_question,
     })
+
 
 @login_required
 def load_routes(request):
