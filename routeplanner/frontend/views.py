@@ -132,24 +132,35 @@ def reset_password(request):
     if request.method == 'POST':
         form = ResetPasswordForm(request.user, request.POST)
         secret_question_form = SecretQuestionForm(request.POST, is_registration=False)
-
+        
         if form.is_valid() and secret_question_form.is_valid():
             # Validate the secret answer
             username = secret_question_form.cleaned_data.get('username')
             answer = secret_question_form.cleaned_data.get('answer')
-
             try:
                 user = User.objects.get(username=username)
                 secret_question = SecretQuestion.objects.get(user=user)
                 if secret_question.answer != answer:
-                    secret_question_form.add_error('answer', 'Incorrect answer to the secret question.')
+                    error_message = "Invalid username or secret question."
+                    return render(request, 'frontend/reset_password.html', {
+                        'form': ResetPasswordForm(),
+                        'secret_question_form': SecretQuestionForm(),
+                        'error_message': error_message,
+                    })
+                    # secret_question_form.add_error('answer', 'Incorrect answer to the secret question.')
                 else:
                     # Save the new password
                     form.user = user  # Assign the user to the password form
                     form.save()
                     return redirect('login')
             except (User.DoesNotExist, SecretQuestion.DoesNotExist):
-                secret_question_form.add_error('username', 'Invalid username or secret question.')
+                error_message = "Invalid username or secret question."
+                return render(request, 'frontend/reset_password.html', {
+                    'form': ResetPasswordForm(),
+                    'secret_question_form': SecretQuestionForm(),
+                    'error_message': error_message,
+                })
+                # secret_question_form.add_error('username', 'Invalid username or secret question.')
 
     else:
         username = request.GET.get('username')
@@ -158,7 +169,12 @@ def reset_password(request):
                 user = User.objects.get(username=username)
                 secret_question = SecretQuestion.objects.get(user=user)
             except (User.DoesNotExist, SecretQuestion.DoesNotExist):
-                pass
+                error_message = "Invalid username or secret question."
+                return render(request, 'frontend/reset_password.html', {
+                    'form': ResetPasswordForm(),
+                    'secret_question_form': SecretQuestionForm(),
+                    'error_message': error_message,
+                })
 
         form = ResetPasswordForm(None)
         secret_question_form = SecretQuestionForm(initial={
@@ -170,6 +186,7 @@ def reset_password(request):
         'form': form,
         'secret_question_form': secret_question_form,
         'secret_question': secret_question,
+        'error_message':None,
     })
 
 
