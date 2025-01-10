@@ -8,7 +8,7 @@
 
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'frontend/css/open_routeplanner.css' %}">
-
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <!-- Include Leaflet.js JavaScript -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -32,7 +32,7 @@
             <button onclick="updateCoordinates()">Plan your route</button>
             <button onclick="save_route()">Save your route</button>
             <button onclick="downloadLineAsGPX()">Download Route (.gpx)</button>
-            <button onclick="loadAndVisualizeRoutes()">Visualize Loaded Routes</button>
+            <button onclick="loadAndVisualizeRoutes()">Visualize Previous Routes</button>
         </div>
         
         <div class="footer">
