@@ -17,7 +17,9 @@ from .models import SecretQuestion
 from django.contrib import messages
 from django.http import Http404
 from .models import RouteData
-
+from axes.models import AccessAttempt
+from django.conf import settings
+from django.utils import timezone
 User = get_user_model()
 
 # Home page view (this is your frontpage)
@@ -30,11 +32,34 @@ def login_view(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+
+            # Check if the user has exceeded the max failed attempts and if they are locked out
+            failed_attempts = AccessAttempt.objects.filter(username=user.username).count()
+            if failed_attempts > 0:
+                last_failed_time = AccessAttempt.objects.filter(username=user.username).last().attempt_time
+                time_diff = timezone.now() - last_failed_time
+                
+                # Check if the lockout period has expired
+                if failed_attempts >= settings.AXES_FAILURE_LIMIT and time_diff.total_seconds() < settings.AXES_COOLOFF_TIME * 60:
+                                     
+                    # Inform the user that their account is locked and they need to wait
+                    messages.error(request, f"Your account is temporarily locked due to too many failed login attempts. Please try again in {settings.AXES_COOLOFF_TIME} minutes.")
+                    return redirect('locked_out')  # Redirect to your custom lockout page
+                if time_diff.total_seconds() < settings.AXES_COOLOFF_TIME * 60:
+                    # Proceed to login if not locked out
+                    return redirect('locked_out')
             login(request, user)
-            return redirect('index')  # Redirect to route planner after login
+            return redirect('index')  # Redirect to the homepage after successful login
+
+        else:
+            # If the form is not valid (wrong credentials), show a generic error message
+            messages.error(request, "Invalid login attempt. Please check your username and password.")
+
     else:
         form = AuthenticationForm()
+
     return render(request, 'frontend/login.html', {'form': form})
+
 
 # Open route planner (accessible without login)
 def open_routeplanner(request):
@@ -285,4 +310,4 @@ def delete_route(request, route_id):
 
 
 def locked_out_view(request):
-    return render(request, 'locked_out.html')
+    return render(request, 'frontend/locked_out.html')
