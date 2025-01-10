@@ -86,5 +86,56 @@
             <p class="home-link">Go back to <a href="{% url 'index' %}">homepage</a></p>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Password validation
+            const passwordInput = document.querySelector('#id_password1');
+            const passwordFeedback = document.createElement('div');
+            passwordFeedback.style.color = 'red';
+            passwordInput.parentElement.appendChild(passwordFeedback);
+
+            passwordInput.addEventListener('input', function () {
+                const password = passwordInput.value;
+                let messages = [];
+
+                if (password.length < 8) {
+                    messages.push('Password must be at least 8 characters long.');
+                }
+                if (!/[A-Z]/.test(password)) {
+                    messages.push('Password must contain an uppercase letter.');
+                }
+                if (!/[a-z]/.test(password)) {
+                    messages.push('Password must contain a lowercase letter.');
+                }
+                if (!/\d/.test(password)) {
+                    messages.push('Password must contain a number.');
+                }
+                if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                    messages.push('Password must contain a special character.');
+                }
+
+                passwordFeedback.innerHTML = messages.join('<br>');
+            });
+
+            // Secret answer validation
+            const secretAnswerInput = document.querySelector('#id_answer');
+            const secretAnswerFeedback = document.createElement('div');
+            secretAnswerFeedback.style.color = 'red';
+            secretAnswerInput.parentElement.appendChild(secretAnswerFeedback);
+
+            secretAnswerInput.addEventListener('input', function () {
+                const answer = secretAnswerInput.value;
+                let messages = [];
+
+                // Check if the answer is at least 64 characters long
+                if (answer.length < 64) {
+                    messages.push('Answer must be at least 64 characters long.');
+                }
+
+                secretAnswerFeedback.innerHTML = messages.join('<br>');
+            });
+        });
+    </script>
 </body>
 </html>

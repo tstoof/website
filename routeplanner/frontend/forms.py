@@ -5,33 +5,68 @@ from django.core.exceptions import ValidationError
 from .models import SecretQuestion
 from django import forms
 from django.contrib.auth.forms import SetPasswordForm
+import re
 
+
+import re
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True, label='Email')
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'password1', 'password2']
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
         if commit:
             user.save()
         return user
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("A user with this email already exists.")
-        return email
     
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+        username = self.cleaned_data.get('username')
+
+        # Ensure password meets the complexity requirements
+        if not re.fullmatch(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$', password):
+            raise ValidationError(
+                ""
+            )
+
+        # Prohibit username from being part of the password
+        if username and username.lower() in password.lower():
+            raise ValidationError('Password must not contain your username.')
+
+        # Separate digits and letters, treating letters case-insensitively
+        digits = [char for char in password if char.isdigit()]
+        letters = [char.lower() for char in password if char.isalpha()]  # Convert to lowercase
+
+        # Ensure all digits are not the same
+        if len(digits) > 1 and len(set(digits)) == 1:
+            raise ValidationError('Password cannot consist of the same digit repeated.')
+
+        # Ensure all letters are not the same (case-insensitive)
+        if letters and len(set(letters)) == 1:
+            raise ValidationError('Password cannot consist of the same letter repeated, ignoring case.')
+
+        return password
+
+    def clean(self):
+        cleaned_data = super(CustomUserCreationForm, self).clean()  # Correctly call the parent form's clean() method
+
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+
+        # Ensure the passwords match
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Passwords do not match.')
+
+        return cleaned_data
 
 
-from django import forms
-from django.contrib.auth.models import User
-from .models import SecretQuestion
 
 class SecretQuestionForm(forms.Form):
     username = forms.CharField(max_length=255, required=True)
@@ -107,4 +142,7 @@ class ResetPasswordForm(SetPasswordForm):
     """Form for setting a new password"""
     new_password1 = forms.CharField(label="New password", widget=forms.PasswordInput)
     new_password2 = forms.CharField(label="Confirm new password", widget=forms.PasswordInput)
+
+
+
 

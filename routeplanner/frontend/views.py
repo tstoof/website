@@ -97,7 +97,7 @@ def personal_routeplanner(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         secret_question_form = SecretQuestionForm(request.POST, is_registration=True)
 
         if form.is_valid() and secret_question_form.is_valid():
@@ -108,10 +108,10 @@ def signup_view(request):
             question = secret_question_form.cleaned_data['question']
             answer = secret_question_form.cleaned_data['answer']
             SecretQuestion.objects.create(user=user, question=question, answer=answer)
-
-            return redirect('open_routeplanner')
+            login(request, user)
+            return redirect('index')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
         secret_question_form = SecretQuestionForm(is_registration=True)
 
     return render(request, 'frontend/signup.html', {
