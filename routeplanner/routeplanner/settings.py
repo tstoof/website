@@ -151,8 +151,8 @@ SESSION_COOKIE_AGE = 3600  # 1 hour
 # Whether or not to expire the session when the user closes their browser
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-AXES_FAILURE_LIMIT = 1  # Number of failed login attempts before the account is locked
-AXES_COOLOFF_TIME = 5  # Number of minutes to wait before resetting failed attempts (set to 1 hour here)
+AXES_FAILURE_LIMIT = 5  # Number of failed login attempts before the account is locked
+AXES_COOLOFF_TIME = 0.0001#0.0834  # Number*60 = minutes to wait before resetting failed attempts (set to 5 minutes)
 AXES_LOCK_OUT_AT_FAILURE = True  # Ensure that the user is locked out after too many failed attempts
 AXES_ONLY_USER_FAILURES = True  # Track failed attempts only for users, not IPs
 AXES_LOCKOUT_URL = '/locked_out/'  # Redirect to the locked_out page
@@ -166,3 +166,5 @@ AUTHENTICATION_BACKENDS = [
 
 # Messages settings
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+

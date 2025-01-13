@@ -13,7 +13,7 @@ urlpatterns = [
     path('history/', views.history, name='history'),
     path('delete_account/', views.delete_account, name='delete_account'),
     path('personal_routeplanner/', views.personal_routeplanner, name="personal_routeplanner"),
-    path('reset_password/', views.reset_password, name='reset_password'),
+    # path('reset_password/', views.reset_password, name='reset_password'),
 
     # route api
     path('api/coordinates/', views.receive_coordinates, name='receive_coordinates'),
@@ -22,4 +22,7 @@ urlpatterns = [
     path('edit_route/<int:route_id>/', views.edit_route, name='edit_route'),
     path('delete_route/<int:route_id>/', views.delete_route, name='delete_route'),
     path('locked_out/', views.locked_out_view, name='locked_out'),
+    path('secret_answer_login/', views.secret_answer_login, name='secret_answer_login'),
+    path('password_reset/', views.password_reset, name='password_reset'),
+
 ]

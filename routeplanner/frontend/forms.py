@@ -134,6 +134,10 @@ class SecretQuestionForm(forms.Form):
 class ResetPasswordForm(SetPasswordForm):
     """Form for setting a new password with validation rules"""
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Capture the user from kwargs
+        super().__init__(*args, **kwargs)
+
     def clean_new_password1(self):
         password = self.cleaned_data.get('new_password1')
 
@@ -148,7 +152,7 @@ class ResetPasswordForm(SetPasswordForm):
         username = self.user.username.lower() if self.user else None
         if username and username in password.lower():
             raise ValidationError('Password must not contain your username.')
-
+        
         # Check for repeated characters
         digits = [char for char in password if char.isdigit()]
         letters = [char.lower() for char in password if char.isalpha()]
@@ -161,3 +165,6 @@ class ResetPasswordForm(SetPasswordForm):
         return password
 
 
+class SecretAnswerLoginForm(forms.Form):
+    username = forms.CharField(max_length=150)
+    secret_answer = forms.CharField(widget=forms.PasswordInput, max_length=255, min_length=64)
