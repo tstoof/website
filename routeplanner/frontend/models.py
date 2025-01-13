@@ -1,6 +1,7 @@
 # frontend/models.py
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 class SecretQuestion(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -21,3 +22,5 @@ class RouteData(models.Model):
 
     def __str__(self):
         return f"Route '{self.name}' for {self.user.username}"
+
+

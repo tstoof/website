@@ -20,6 +20,10 @@ from .models import RouteData
 from axes.models import AccessAttempt
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.utils.timezone import now, timedelta
+from axes.models import AccessAttempt
+
 User = get_user_model()
 
 # Home page view (this is your frontpage)
@@ -60,6 +64,120 @@ def login_view(request):
 
     return render(request, 'frontend/login.html', {'form': form})
 
+
+def reset_password(request):
+    secret_question = None
+    user = None
+    error_message = None
+
+    if request.method == 'POST':
+        # Pass the user to the form initialization
+        form = ResetPasswordForm(user=request.user, data=request.POST)  # Pass user here
+        secret_question_form = SecretQuestionForm(request.POST, is_registration=False)
+
+        username = secret_question_form.data.get('username')
+        answer = secret_question_form.data.get('answer')
+
+        # Get the user and secret question objects
+        try:
+            user = User.objects.get(username=username)
+            secret_question = SecretQuestion.objects.get(user=user)
+        except User.DoesNotExist or SecretQuestion.DoesNotExist:
+            error_message = "Invalid username or secret question."
+            return render(request, 'frontend/reset_password.html', {
+                'form': form,
+                'secret_question_form': secret_question_form,
+                'error_message': error_message,
+            })
+
+        if form.is_valid() and not secret_question_form.is_valid():
+            if secret_question.answer != answer:
+                # Check if an access attempt already exists for this combination
+                try:
+                    access_attempt = AccessAttempt.objects.get(
+                        username=username,
+                        ip_address=request.META.get('REMOTE_ADDR'),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                    # If the record exists, we can update the failure count or timestamp if needed
+                    access_attempt.attempt_time = now()  # Update the timestamp of the failed attempt
+                    access_attempt.save()  # Save the updated record
+                except AccessAttempt.DoesNotExist:
+                    # If no previous attempt exists, create a new record
+                    AccessAttempt.objects.create(
+                        username=username,
+                        ip_address=request.META.get('REMOTE_ADDR'),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        attempt_time=now(),
+                        failures_since_start=0,  # You can set this to whatever default you need
+                    )
+
+                # Check if the failure limit is reached
+                cooloff_time = timedelta(minutes=settings.AXES_COOLOFF_TIME)
+                recent_attempts = AccessAttempt.objects.filter(
+                    username=username,
+                    attempt_time__gte=now() - cooloff_time
+                )
+                failures = recent_attempts.count()
+
+                if failures >= settings.AXES_FAILURE_LIMIT:
+                    # If maximum attempts reached, redirect to locked_out page
+                    return render(request, 'frontend/locked_out.html', {
+                        'error_message': f"Too many failed attempts. Please try again later."
+                    })
+
+                # Otherwise, give an error message and stay on the form
+                error_message = "Invalid username or secret question answer."
+                return render(request, 'frontend/reset_password.html', {
+                    'form': form,
+                    'secret_question_form': secret_question_form,
+                    'error_message': error_message,
+                })
+
+        elif form.is_valid() and secret_question_form.is_valid():
+            # If both forms are valid, proceed with resetting the password
+            try:
+                # Clear recent failed attempts if the answer is correct
+                recent_attempts.delete()
+
+                # Save the new password
+                form.user = user
+                form.save()
+                return redirect('login')  # Redirect to the login page on success
+
+            except (User.DoesNotExist, SecretQuestion.DoesNotExist):
+                error_message = "Invalid username or secret question."
+
+        else:
+            # If the forms are invalid, stay on the same page with error messages
+            error_message = "Please fill out the forms correctly."
+
+    else:
+        username = request.GET.get('username')
+        if username:
+            try:
+                user = User.objects.get(username=username)
+                secret_question = SecretQuestion.objects.get(user=user)
+            except (User.DoesNotExist, SecretQuestion.DoesNotExist):
+                error_message = "Invalid username or secret question."
+                return render(request, 'frontend/reset_password.html', {
+                    'form': ResetPasswordForm(),
+                    'secret_question_form': SecretQuestionForm(),
+                    'error_message': error_message,
+                })
+
+        form = ResetPasswordForm(None)
+        secret_question_form = SecretQuestionForm(initial={
+            'username': username,
+            'question': secret_question.question if secret_question else '',
+        }, is_registration=False)
+
+    return render(request, 'frontend/reset_password.html', {
+        'form': form,
+        'secret_question_form': secret_question_form,
+        'secret_question': secret_question,
+        'error_message': error_message,
+    })
 
 # Open route planner (accessible without login)
 def open_routeplanner(request):
@@ -128,12 +246,15 @@ def signup_view(request):
         if form.is_valid() and secret_question_form.is_valid():
             # Save user
             user = form.save()
+            # Clear any failed attempts that may have been erroneously registered
+            AccessAttempt.objects.filter(username=user.username).delete()
 
             # Save secret question
             question = secret_question_form.cleaned_data['question']
             answer = secret_question_form.cleaned_data['answer']
             SecretQuestion.objects.create(user=user, question=question, answer=answer)
-            login(request, user)
+            
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('index')
     else:
         form = CustomUserCreationForm()
@@ -145,74 +266,9 @@ def signup_view(request):
     })
 
 
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
-from .forms import ResetPasswordForm, SecretQuestionForm
-from .models import SecretQuestion
 
-def reset_password(request):
-    secret_question = None
-    user = None
 
-    if request.method == 'POST':
-        form = ResetPasswordForm(request.user, request.POST)
-        secret_question_form = SecretQuestionForm(request.POST, is_registration=False)
-        
-        if form.is_valid() and secret_question_form.is_valid():
-            # Validate the secret answer
-            username = secret_question_form.cleaned_data.get('username')
-            answer = secret_question_form.cleaned_data.get('answer')
-            try:
-                user = User.objects.get(username=username)
-                secret_question = SecretQuestion.objects.get(user=user)
-                if secret_question.answer != answer:
-                    error_message = "Invalid username or secret question."
-                    return render(request, 'frontend/reset_password.html', {
-                        'form': ResetPasswordForm(),
-                        'secret_question_form': SecretQuestionForm(),
-                        'error_message': error_message,
-                    })
-                    # secret_question_form.add_error('answer', 'Incorrect answer to the secret question.')
-                else:
-                    # Save the new password
-                    form.user = user  # Assign the user to the password form
-                    form.save()
-                    return redirect('login')
-            except (User.DoesNotExist, SecretQuestion.DoesNotExist):
-                error_message = "Invalid username or secret question."
-                return render(request, 'frontend/reset_password.html', {
-                    'form': ResetPasswordForm(),
-                    'secret_question_form': SecretQuestionForm(),
-                    'error_message': error_message,
-                })
-                # secret_question_form.add_error('username', 'Invalid username or secret question.')
 
-    else:
-        username = request.GET.get('username')
-        if username:
-            try:
-                user = User.objects.get(username=username)
-                secret_question = SecretQuestion.objects.get(user=user)
-            except (User.DoesNotExist, SecretQuestion.DoesNotExist):
-                error_message = "Invalid username or secret question."
-                return render(request, 'frontend/reset_password.html', {
-                    'form': ResetPasswordForm(),
-                    'secret_question_form': SecretQuestionForm(),
-                    'error_message': error_message,
-                })
-
-        form = ResetPasswordForm(None)
-        secret_question_form = SecretQuestionForm(initial={
-            'username': username,
-            'question': secret_question.question if secret_question else '',
-        }, is_registration=False)
-
-    return render(request, 'frontend/reset_password.html', {
-        'form': form,
-        'secret_question_form': secret_question_form,
-        'secret_question': secret_question,
-        'error_message':None,
-    })
 
 
 @login_required
