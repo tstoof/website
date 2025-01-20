@@ -50,17 +50,47 @@
                         const createdAt = new Date(route.created_at);
                         const formattedDate = `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}`;
                         
-                        routeItem.innerHTML = `
-                            <h3>Route: ${route.name}</h3>
-                            <p><strong>Date:</strong> ${formattedDate}</p>
-                            <div class="map-container" id="map-${route.id}"></div> <!-- Map container for this route -->
-                            <div class="buttons">
-                                <!-- Edit Route Button -->
-                                <button class="button" onclick="editRoute(${route.id})">Edit Route</button>
-                                <!-- Delete Route Button -->
-                                <button class="button" onclick="deleteRoute(${route.id})">Delete Route</button>
-                            </div>
-                        `;
+                        routeItem.id = `route-${route.id}`;  // Set an ID for the route
+
+                        // Create and insert the route name securely
+                        const routeName = document.createElement('h3');
+                        routeName.textContent = `Route: ${route.name}`; // Use textContent to prevent XSS
+                        routeItem.appendChild(routeName);
+
+                        // Create and insert the formatted date securely
+                        const routeDate = document.createElement('p');
+                        const dateStrong = document.createElement('strong');
+                        dateStrong.textContent = 'Date:';
+                        routeDate.appendChild(dateStrong);
+                        routeDate.appendChild(document.createTextNode(` ${formattedDate}`));
+                        routeItem.appendChild(routeDate);
+
+                        // Create map container
+                        const mapContainer = document.createElement('div');
+                        mapContainer.classList.add('map-container');
+                        mapContainer.id = `map-${route.id}`;
+                        routeItem.appendChild(mapContainer);
+
+                        // Create buttons container
+                        const buttonsContainer = document.createElement('div');
+                        buttonsContainer.classList.add('buttons');
+
+                        // Create and insert the "Edit Route" button securely
+                        const editButton = document.createElement('button');
+                        editButton.classList.add('button');
+                        editButton.textContent = 'Edit Route'; // Use textContent for security
+                        editButton.onclick = function() { editRoute(route.id); };
+                        buttonsContainer.appendChild(editButton);
+
+                        // Create and insert the "Delete Route" button securely
+                        const deleteButton = document.createElement('button');
+                        deleteButton.classList.add('button');
+                        deleteButton.textContent = 'Delete Route'; // Use textContent for security
+                        deleteButton.onclick = function() { deleteRoute(route.id); };
+                        buttonsContainer.appendChild(deleteButton);
+
+                        // Append the buttons container to the route item
+                        routeItem.appendChild(buttonsContainer);
                         
                         // Append the route item to the container
                         routeHistoryContainer.appendChild(routeItem);

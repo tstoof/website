@@ -272,44 +272,10 @@ def edit_route(request, route_id):
     else:
         return JsonResponse({'error': 'Invalid request method. Use POST.'}, status=405)
 
-# @login_required
-# @csrf_exempt
-# def edit_route(request, route_id):
-#     try:
-#         # Fetch the route for the current user
-#         route = get_object_or_404(RouteData, id=route_id, user=request.user)
-#     except RouteData.DoesNotExist:
-#         logger.error(f"Route with id {route_id} does not exist or doesn't belong to the user")
-#         return JsonResponse({'error': 'Route not found or permission denied'}, status=404)
-
-#     if request.method == 'POST':
-#         try:
-#             # Get the new route name from the request body
-#             data = json.loads(request.body)
-#             route_name = data.get('route_name')
-
-#             if not route_name:
-#                 return JsonResponse({'error': 'Route name is required'}, status=400)
-
-#             # Update the route's name
-#             route.name = route_name
-#             route.save()
-
-#             return JsonResponse({'status': 'success', 'message': 'Route updated successfully'})
-
-#         except json.JSONDecodeError:
-#             logger.error(f"Invalid JSON data received for route {route_id}")
-#             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-#         except Exception as e:
-#             logger.error(f"Error updating route {route_id}: {str(e)}")
-#             return JsonResponse({'error': str(e)}, status=400)
-
-#     else:
-#         return JsonResponse({'error': 'Invalid request method. Use POST.'}, status=405)
 
 # Delete Route function
 @login_required
-@csrf_exempt
+@csrf_protect
 def delete_route(request, route_id):
     try:
         # Fetch the route for the current user
