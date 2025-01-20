@@ -210,7 +210,7 @@ def load_routes(request):
     if request.method == 'GET':
         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
-        
+        logger.info(routes)
         route_list = []
         for route in routes:
             try:
