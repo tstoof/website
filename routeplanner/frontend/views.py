@@ -158,19 +158,50 @@ def signup_view(request):
 
 
 
+# @login_required
+# def load_routes(request):
+#     if request.method == 'GET':
+#         routes = RouteData.objects.filter(user=request.user)
+#         route_list = [
+#             {'id': route.id, 'name': route.name, 'data': route.data, 'created_at': route.created_at}
+#             for route in routes
+#         ]
+#         return JsonResponse({'routes': route_list})
+
+#     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
 @login_required
-def load_routes(request):
-    if request.method == 'GET':
-        routes = RouteData.objects.filter(user=request.user)
-        route_list = [
-            {'id': route.id, 'name': route.name, 'data': route.data, 'created_at': route.created_at}
-            for route in routes
-        ]
-        return JsonResponse({'routes': route_list})
+def load_route(request, route_id):
+    try:
+        route = RouteData.objects.get(id=route_id, user=request.user)
+        decrypted_data = route.decrypt_data()
+        return JsonResponse({'name': route.name, 'data': json.loads(decrypted_data)}, status=200)
+    except RouteData.DoesNotExist:
+        return JsonResponse({'error': 'Route not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+# @login_required
+# def save_route(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)  # Parse the incoming JSON data
+#             route_name = data.get('name')
+#             route_data = data.get('data')
 
+#             if not route_name or not route_data:
+#                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
+#             # Create and save the new route
+#             route = RouteData(user=request.user, name=route_name, data=route_data)
+#             route.save()
+
+#             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
+
+#         except Exception as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#     return JsonResponse({'error': 'Invalid request method'}, status=405)
 @login_required
 def save_route(request):
     if request.method == 'POST':
@@ -182,9 +213,10 @@ def save_route(request):
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
-            # Create and save the new route
-            route = RouteData(user=request.user, name=route_name, data=route_data)
-            route.save()
+            # Encrypt the route data before saving
+            encrypted_route_data = RouteData.objects.create(user=request.user, name=route_name)
+            encrypted_route_data.data = encrypted_route_data.encrypt_data(json.dumps(route_data))
+            encrypted_route_data.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
 

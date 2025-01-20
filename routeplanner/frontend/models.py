@@ -19,14 +19,30 @@ class SecretQuestion(models.Model):
         super().save(*args, **kwargs)
 
 
+# class RouteData(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='routes')
+#     name = models.CharField(max_length=255)  # Optional: name or title for the route
+#     data = models.JSONField()  # Stores route data as JSON
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return f"Route '{self.name}' for {self.user.username}"
+
+
+from django.conf import settings
+from cryptography.fernet import Fernet
+
 class RouteData(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='routes')
-    name = models.CharField(max_length=255)  # Optional: name or title for the route
-    data = models.JSONField()  # Stores route data as JSON
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    data = models.TextField()  # Encrypted route data
 
-    def __str__(self):
-        return f"Route '{self.name}' for {self.user.username}"
+    # Encryption methods
+    def encrypt_data(self, raw_data):
+        cipher = Fernet(settings.ENCRYPTION_KEY)
+        return cipher.encrypt(raw_data.encode()).decode()
 
-
+    def decrypt_data(self):
+        cipher = Fernet(settings.ENCRYPTION_KEY)
+        return cipher.decrypt(self.data.encode()).decode()
