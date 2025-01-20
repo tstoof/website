@@ -197,7 +197,7 @@ def load_routes(request):
         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
         route_list = [
-            {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(route.data).decode('utf-8'), 'created_at': route.created_at}
+            {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(b64decode(route.data)).decode('utf-8'), 'created_at': route.created_at}
             for route in routes
         ]
         return JsonResponse({'routes': route_list})
