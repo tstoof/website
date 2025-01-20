@@ -11,4 +11,4 @@ pymongo[srv]
 psycopg
 django-axes
 cryptography
-django-csp
+django_csp==3.8
