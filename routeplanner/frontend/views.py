@@ -219,7 +219,7 @@ def load_routes(request):
                 route_list.append({
                     'id': route.id,
                     'name': route.name,
-                    'data': decrypted_data,
+                    'data': json.loads(decrypted_data),
                     'created_at': route.created_at
                 })
             except Exception as e:
