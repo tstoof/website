@@ -1,4 +1,4 @@
-<!-- {% load static %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +14,7 @@
         <div class="form-wrapper">
             <h2>Create an Account</h2>
 
+            <!-- Signup form -->
             <form method="POST">
                 {% csrf_token %}
             
@@ -53,6 +54,7 @@
                     {% endif %}
                 </div>
             
+                <!-- Secret question fields -->
                 <div class="form-group">
                     <label for="{{ secret_question_form.question.id_for_label }}">Secret Question:</label>
                     {{ secret_question_form.question }}
@@ -132,156 +134,10 @@
                     messages.push('Answer must be at least 64 characters long.');
                 }
                 else {
-                    feedback.innerHTML = 'Answer length is sufficient.';
+                    feedback.textContent = 'Answer length is sufficient.';
                 }
 
-                secretAnswerFeedback.innerHTML = messages.join('<br>');
-            });
-        });
-    </script>
-</body>
-</html> -->
-
-
-{% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Route Planner</title>
-    <link rel="stylesheet" href="{% static 'frontend/css/signup.css' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-</head>
-<body>
-    <div class="container">
-        <div class="form-wrapper">
-            <h2>Create an Account</h2>
-
-            <!-- Signup form -->
-            <form method="POST">
-                {% csrf_token %}
-            
-                <div class="form-group">
-                    <label for="{{ form.username.id_for_label }}">Username:</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <ul class="error-list">
-                            {% for error in form.username.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            
-                <div class="form-group">
-                    <label for="{{ form.password1.id_for_label }}">Password:</label>
-                    {{ form.password1 }}
-                    <input type="password" name="password1" id="id_password1" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$" required>
-                    {% if form.password1.errors %}
-                        <ul class="error-list">
-                            {% for error in form.password1.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            
-                <div class="form-group">
-                    <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
-                    {{ form.password2 }}
-                    {% if form.password2.errors %}
-                        <ul class="error-list">
-                            {% for error in form.password2.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            
-                <!-- Secret question fields -->
-                <div class="form-group">
-                    <label for="{{ secret_question_form.question.id_for_label }}">Secret Question:</label>
-                    {{ secret_question_form.question }}
-                    {% if secret_question_form.question.errors %}
-                        <ul class="error-list">
-                            {% for error in secret_question_form.question.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            
-                <div class="form-group">
-                    <label for="{{ secret_question_form.answer.id_for_label }}">Secret Answer:</label>
-                    <input type="text" name="answer" id="id_answer" required>
-                    {% if secret_question_form.answer.errors %}
-                        <ul class="error-list">
-                            {% for error in secret_question_form.answer.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            
-                <button type="submit" class="btn-submit">Sign Up</button>
-            </form>
-
-            <p class="login-link">Already have an account? <a href="{% url 'login' %}">Login</a></p>
-            <p class="home-link">Go back to <a href="{% url 'index' %}">homepage</a></p>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Password validation feedback
-            const passwordInput = document.querySelector('#id_password1');
-            const passwordFeedback = document.createElement('div');
-            passwordFeedback.style.color = 'red';
-            passwordInput.parentElement.appendChild(passwordFeedback);
-
-            passwordInput.addEventListener('input', function () {
-                const password = passwordInput.value;
-                let messages = [];
-
-                if (password.length < 8) {
-                    messages.push('Password must be at least 8 characters long.');
-                }
-                if (!/[A-Z]/.test(password)) {
-                    messages.push('Password must contain an uppercase letter.');
-                }
-                if (!/[a-z]/.test(password)) {
-                    messages.push('Password must contain a lowercase letter.');
-                }
-                if (!/\d/.test(password)) {
-                    messages.push('Password must contain a number.');
-                }
-                if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                    messages.push('Password must contain a special character.');
-                }
-
-                // Inject messages safely
-                passwordFeedback.textContent = messages.join(' | ');
-            });
-
-            // Secret answer validation feedback
-            const secretAnswerInput = document.querySelector('#id_answer');
-            const secretAnswerFeedback = document.createElement('div');
-            secretAnswerFeedback.style.color = 'red';
-            secretAnswerInput.parentElement.appendChild(secretAnswerFeedback);
-
-            secretAnswerInput.addEventListener('input', function () {
-                const answer = secretAnswerInput.value;
-                let messages = [];
-
-                // Check if the answer is at least 64 characters long
-                if (answer.length < 64) {
-                    messages.push('Answer must be at least 64 characters long.');
-                }
-
-                // Inject messages safely
-                secretAnswerFeedback.textContent = messages.join(' | ');
+                secretAnswerFeedback.textContent = messages.join('<br>');
             });
         });
     </script>
