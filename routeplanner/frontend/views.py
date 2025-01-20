@@ -158,29 +158,20 @@ def signup_view(request):
 
 
 
-# @login_required
-# def load_routes(request):
-#     if request.method == 'GET':
-#         routes = RouteData.objects.filter(user=request.user)
-#         route_list = [
-#             {'id': route.id, 'name': route.name, 'data': route.data, 'created_at': route.created_at}
-#             for route in routes
-#         ]
-#         return JsonResponse({'routes': route_list})
-
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
 @login_required
-def load_routes(request, route_id):
-    try:
-        route = RouteData.objects.get(id=route_id, user=request.user)
-        decrypted_data = route.decrypt_data()
-        return JsonResponse({'name': route.name, 'data': json.loads(decrypted_data)}, status=200)
-    except RouteData.DoesNotExist:
-        return JsonResponse({'error': 'Route not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+def load_routes(request):
+    if request.method == 'GET':
+        routes = RouteData.objects.filter(user=request.user)
+        route_list = [
+            {'id': route.id, 'name': route.name, 'data': route.data, 'created_at': route.created_at}
+            for route in routes
+        ]
+        return JsonResponse({'routes': route_list})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
 
 # @login_required
 # def save_route(request):
