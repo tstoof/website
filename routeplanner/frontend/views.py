@@ -206,9 +206,16 @@ def save_route(request):
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
             # Check if route_data is valid JSON
-            if not isinstance(route_data, dict):
-                return JsonResponse({'error': f'Invalid JSON data for route. {route_data}'}, status=400)
+            if not isinstance(route_data, list):
+                return JsonResponse({'error': 'Route data must be a list of dictionaries.'}, status=400)
 
+            for item in route_data:
+                if not isinstance(item, dict):
+                    return JsonResponse({'error': 'Each route data item must be a dictionary.'}, status=400)
+                if 'lat' not in item or 'lng' not in item:
+                    return JsonResponse({'error': 'Each route data item must contain lat and lng.'}, status=400)
+            
+            route_data = {"name":route_name, "route":route_data}
             # Encrypt the route data if needed
             encrypted_route_data = RouteData.encrypt_data(route_data)
 
