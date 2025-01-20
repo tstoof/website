@@ -201,12 +201,13 @@ def save_route(request):
             route_name = data.get('name')
             route_data = data.get('data')
 
+            print(route_data)
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
             # Check if route_data is valid JSON
             if not isinstance(route_data, dict):
-                return JsonResponse({'error': 'Invalid JSON data for route.'}, status=400)
+                return JsonResponse({'error': f'Invalid JSON data for route. {route_data}'}, status=400)
 
             # Encrypt the route data if needed
             encrypted_route_data = RouteData.encrypt_data(route_data)
