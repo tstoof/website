@@ -172,7 +172,7 @@ def signup_view(request):
 
 
 @login_required
-def load_route(request, route_id):
+def load_routes(request, route_id):
     try:
         route = RouteData.objects.get(id=route_id, user=request.user)
         decrypted_data = route.decrypt_data()
