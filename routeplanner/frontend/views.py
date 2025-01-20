@@ -173,62 +173,25 @@ def load_routes(request):
 
 
 
-# @login_required
-# def save_route(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)  # Parse the incoming JSON data
-#             route_name = data.get('name')
-#             route_data = data.get('data')
-
-#             if not route_name or not route_data:
-#                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
-
-#             # Create and save the new route
-#             route = RouteData(user=request.user, name=route_name, data=route_data)
-#             route.save()
-
-#             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
-
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=400)
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
 @login_required
 def save_route(request):
     if request.method == 'POST':
         try:
-            # Parse the incoming JSON data
-            data = json.loads(request.body)  
+            data = json.loads(request.body)  # Parse the incoming JSON data
             route_name = data.get('name')
-            route_data = data.get('route')  # Access the route data from the new structure
+            route_data = data.get('data')
 
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
-            # Validate that the route_data is a list of dictionaries containing lat and lng
-            if not isinstance(route_data, list):
-                return JsonResponse({'error': 'Route data must be a list of dictionaries.'}, status=400)
-
-            for item in route_data:
-                if not isinstance(item, dict):
-                    return JsonResponse({'error': 'Each route data item must be a dictionary.'}, status=400)
-                if 'lat' not in item or 'lng' not in item:
-                    return JsonResponse({'error': 'Each route data item must contain lat and lng.'}, status=400)
-
-            # Encrypt the route data before saving it to the database
-            encrypted_route_data = encrypt_data(json.dumps(route_data))  # Convert to string before encrypting
-
             # Create and save the new route
-            route = RouteData(user=request.user, name=route_name, data=encrypted_route_data)
+            route = RouteData(user=request.user, name=route_name, data=route_data)
             route.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format in request body.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
