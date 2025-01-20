@@ -210,9 +210,10 @@ def load_routes(request):
     if request.method == 'GET':
         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
-        logger.info(routes)
+        print(routes)
         route_list = []
         for route in routes:
+            print(route)
             try:
                 decrypted_data = cipher_suite.decrypt(b64decode(route.data)).decode('utf-8')
                 route_list.append({

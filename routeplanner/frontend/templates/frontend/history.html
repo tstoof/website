@@ -110,7 +110,7 @@
                     });
                 } else {
                     const routeHistoryContainer = document.getElementById('route-history');
-                    routeHistoryContainer.innerHTML = '<p>No routes found.</p>';
+                    routeHistoryContainer.innerText = '<p>No routes found.</p>';
                 }
             })
             .catch(error => {
