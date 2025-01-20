@@ -217,6 +217,10 @@ def save_route(request):
 
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
+            
+            if isinstance(route_data, (list, dict)):
+                route_data = json.dumps(route_data)
+                
             cipher_suite = Fernet(settings.ENCRYPTION_KEY)
             encrypted_route_data = cipher_suite.encrypt(route_data.encode('utf-8'))
             # Create and save the new route
