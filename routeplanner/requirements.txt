@@ -12,3 +12,4 @@ psycopg
 django-axes
 cryptography
 django_csp==3.8
+base64

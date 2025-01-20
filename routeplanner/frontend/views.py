@@ -205,7 +205,7 @@ def load_routes(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
+from base64 import b64encode, b64decode
 from cryptography.fernet import Fernet
 @login_required
 def save_route(request):
@@ -220,11 +220,16 @@ def save_route(request):
             
             if isinstance(route_data, (list, dict)):
                 route_data = json.dumps(route_data)
-                
+
             cipher_suite = Fernet(settings.ENCRYPTION_KEY)
-            encrypted_route_data = cipher_suite.encrypt(route_data.encode('utf-8'))
+            # Encrypt the route data
+            encrypted_data = cipher_suite.encrypt(route_data.encode())
+
+            # Encode the encrypted data in Base64 for JSON compatibility
+            encrypted_data_base64 = b64encode(encrypted_data).decode('utf-8')
+            
             # Create and save the new route
-            route = RouteData(user=request.user, name=route_name, data=encrypted_route_data)
+            route = RouteData(user=request.user, name=route_name, data=encrypted_data_base64)
             route.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
