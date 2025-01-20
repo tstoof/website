@@ -11,3 +11,4 @@ pymongo[srv]
 psycopg
 django-axes
 cryptography
+django-csp

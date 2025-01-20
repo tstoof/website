@@ -21,7 +21,6 @@ import os
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 ORS_API_KEY = config('ORS_API_KEY')
-ENCRYPTION_KEY = config('ENCRYPTION_KEY')
 
 # password = quote_plus(config('DATABASE_KEY'))
 # MONGO_URI = "mongodb+srv://tamarastoof:" + password + "@website.qtybm.mongodb.net/?retryWrites=true&w=majority&appName=website"
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django_csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -181,3 +181,15 @@ CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# settings.py
+
+CSP_DEFAULT_SRC = ("'self'",)  # Only allow content from the same domain
+CSP_SCRIPT_SRC = ("'self'",)  # Allow scripts only from the same domain
+CSP_STYLE_SRC = ("'self'",)  # Allow styles only from the same domain
+CSP_IMG_SRC = ("'self'",)  # Allow images only from the same domain
+CSP_FONT_SRC = ("'self'",)  # Allow fonts only from the same domain
+CSP_CONNECT_SRC = ("'self'",)  # Allow AJAX/Fetch requests only to the same domain
+CSP_OBJECT_SRC = ("'none'",)  # Disallow embedding of plugins and other objects
+CSP_FRAME_SRC = ("'none'",)  # Disallow embedding the site in frames or iframes

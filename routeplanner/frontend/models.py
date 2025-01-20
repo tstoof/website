@@ -30,23 +30,6 @@ class RouteData(models.Model):
         return f"Route '{self.name}' for {self.user.username}"
 
 
-# from django.conf import settings
-# from cryptography.fernet import Fernet
-
-# class RouteData(models.Model):
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=255)
-#     data = models.TextField()  # Encrypted route data
-
-#     # Encryption methods
-#     def encrypt_data(self, raw_data):
-#         cipher = Fernet(settings.ENCRYPTION_KEY)
-#         return cipher.encrypt(raw_data.encode()).decode()
-
-#     def decrypt_data(self):
-#         cipher = Fernet(settings.ENCRYPTION_KEY)
-#         return cipher.decrypt(self.data.encode()).decode()
-    
 
 
 
