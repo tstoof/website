@@ -213,15 +213,24 @@ def save_route(request):
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
-            # Encrypt the route data before saving
-            encrypted_route_data = RouteData.objects.create(user=request.user, name=route_name)
-            encrypted_route_data.data = encrypted_route_data.encrypt_data(json.dumps(route_data))
-            encrypted_route_data.save()
+            # Check if route_data is valid JSON
+            if not isinstance(route_data, dict):
+                return JsonResponse({'error': 'Invalid JSON data for route.'}, status=400)
+
+            # Encrypt the route data if needed
+            encrypted_route_data = RouteData.encrypt_data(route_data)
+
+            # Create and save the new route
+            route = RouteData(user=request.user, name=route_name, data=encrypted_route_data)
+            route.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
 
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format in request body.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
