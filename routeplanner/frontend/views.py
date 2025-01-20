@@ -194,9 +194,10 @@ def signup_view(request):
 @login_required
 def load_routes(request):
     if request.method == 'GET':
+        cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
         route_list = [
-            {'id': route.id, 'name': route.name, 'data': route.data, 'created_at': route.created_at}
+            {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(route.data).decode('utf-8'), 'created_at': route.created_at}
             for route in routes
         ]
         return JsonResponse({'routes': route_list})
@@ -205,7 +206,7 @@ def load_routes(request):
 
 
 
-
+from cryptography.fernet import Fernet
 @login_required
 def save_route(request):
     if request.method == 'POST':
@@ -216,9 +217,10 @@ def save_route(request):
 
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
-
+            cipher_suite = Fernet(settings.ENCRYPTION_KEY)
+            encrypted_route_data = cipher_suite.encrypt(route_data.encode('utf-8'))
             # Create and save the new route
-            route = RouteData(user=request.user, name=route_name, data=route_data)
+            route = RouteData(user=request.user, name=route_name, data=encrypted_route_data)
             route.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
@@ -385,11 +387,6 @@ def secret_answer_login(request):
             try:
                 user = User.objects.get(username=username)
                 secret_question = SecretQuestion.objects.get(user=user)
-
-                # Debugging
-                print(f"Provided answer: {secret_answer}")
-                print(f"Stored hash: {secret_question.answer}")
-                print(f"Is valid hash: {secret_question.answer.startswith('pbkdf2_sha256$')}")
 
                 # Ensure the hash is valid
                 if not secret_question.answer.startswith('pbkdf2_sha256$'):
