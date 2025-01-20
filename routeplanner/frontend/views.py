@@ -197,15 +197,15 @@ def load_routes(request):
 def save_route(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # Parse the incoming JSON data
+            # Parse the incoming JSON data
+            data = json.loads(request.body)  
             route_name = data.get('name')
-            route_data = data.get('data')
+            route_data = data.get('route')  # Access the route data from the new structure
 
-            print(route_data)
             if not route_name or not route_data:
                 return JsonResponse({'error': 'Missing route name or data'}, status=400)
 
-            # Check if route_data is valid JSON
+            # Validate that the route_data is a list of dictionaries containing lat and lng
             if not isinstance(route_data, list):
                 return JsonResponse({'error': 'Route data must be a list of dictionaries.'}, status=400)
 
@@ -214,10 +214,9 @@ def save_route(request):
                     return JsonResponse({'error': 'Each route data item must be a dictionary.'}, status=400)
                 if 'lat' not in item or 'lng' not in item:
                     return JsonResponse({'error': 'Each route data item must contain lat and lng.'}, status=400)
-            
-            route_data = {"name":route_name, "route":route_data}
-            # Encrypt the route data if needed
-            encrypted_route_data = RouteData.encrypt_data(route_data)
+
+            # Encrypt the route data before saving it to the database
+            encrypted_route_data = encrypt_data(json.dumps(route_data))  # Convert to string before encrypting
 
             # Create and save the new route
             route = RouteData(user=request.user, name=route_name, data=encrypted_route_data)

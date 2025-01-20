@@ -46,3 +46,23 @@ class RouteData(models.Model):
     def decrypt_data(self):
         cipher = Fernet(settings.ENCRYPTION_KEY)
         return cipher.decrypt(self.data.encode()).decode()
+    
+
+
+
+def generate_key():
+    return Fernet.generate_key()
+
+# Encrypt data (return as bytes)
+def encrypt_data(raw_data):
+    key = settings.ENCRYPTION_KEY  # Make sure to use your actual key here.
+    fernet = Fernet(key)
+    encrypted_data = fernet.encrypt(raw_data.encode())  # Ensure the data is in bytes
+    return encrypted_data
+
+# Decrypt data (return as string)
+def decrypt_data(encrypted_data):
+    key = settings.ENCRYPTION_KEY  # Use the same key used for encryption
+    fernet = Fernet(key)
+    decrypted_data = fernet.decrypt(encrypted_data).decode()  # Decoding back to string
+    return decrypted_data
