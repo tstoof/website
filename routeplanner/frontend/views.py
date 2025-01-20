@@ -23,6 +23,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.utils.timezone import now, timedelta
 from axes.models import AccessAttempt
+from django.views.decorators.csrf import csrf_protect  # Use csrf_protect if necessary
+
+
 
 User = get_user_model()
 
@@ -71,30 +74,7 @@ def open_routeplanner(request):
     return render(request, 'frontend/open_routeplanner.html')
 
 
-# @csrf_exempt
-# def receive_coordinates(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)  # Parse the incoming JSON data
-#             marker1_lat = data.get('marker1').get('lat')
-#             marker1_lng = data.get('marker1').get('lng')
-#             marker2_lat = data.get('marker2').get('lat')
-#             marker2_lng = data.get('marker2').get('lng')
 
-#             coord1 = (marker1_lng, marker1_lat)
-#             coord2 = (marker2_lng, marker2_lat)
-#             route = plan_route(coord1, coord2)
-#             # Store in the session
-#             request.session["route"] = route
-
-#             return JsonResponse({"status": "success", "line_data": route, "route":request.session["route"]})
-#         except Exception as e:
-#             print(f"Error in POST: {e}")  # Debugging line
-#             return JsonResponse({"status": "error", "message": str(e)}, status=400)
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect  # Use csrf_protect if necessary
-import json
 
 @csrf_protect  # Ensures CSRF protection for POST requests
 def receive_coordinates(request):
@@ -211,8 +191,6 @@ def signup_view(request):
 
 
 
-
-
 @login_required
 def load_routes(request):
     if request.method == 'GET':
@@ -251,23 +229,32 @@ def save_route(request):
 
 
 @login_required
-@csrf_exempt
+@csrf_protect  # Ensures CSRF protection for POST requests
 def edit_route(request, route_id):
     try:
         # Fetch the route for the current user
         route = get_object_or_404(RouteData, id=route_id, user=request.user)
     except RouteData.DoesNotExist:
-        logger.error(f"Route with id {route_id} does not exist or doesn't belong to the user")
+        logger.warning(f"Route with id {route_id} does not exist or doesn't belong to the user")
         return JsonResponse({'error': 'Route not found or permission denied'}, status=404)
 
     if request.method == 'POST':
         try:
             # Get the new route name from the request body
             data = json.loads(request.body)
-            route_name = data.get('route_name')
 
+            # Validate route_name input
+            route_name = data.get('route_name')
             if not route_name:
                 return JsonResponse({'error': 'Route name is required'}, status=400)
+            
+            # Ensure the route name is a valid string (e.g., no special characters)
+            if not isinstance(route_name, str) or len(route_name.strip()) == 0:
+                return JsonResponse({'error': 'Route name must be a valid non-empty string'}, status=400)
+
+            # Optionally, you can add a length limit for the route name
+            if len(route_name) > 100:  # Example: restrict name length to 100 characters
+                return JsonResponse({'error': 'Route name is too long. Maximum length is 100 characters.'}, status=400)
 
             # Update the route's name
             route.name = route_name
@@ -276,14 +263,49 @@ def edit_route(request, route_id):
             return JsonResponse({'status': 'success', 'message': 'Route updated successfully'})
 
         except json.JSONDecodeError:
-            logger.error(f"Invalid JSON data received for route {route_id}")
+            logger.warning(f"Invalid JSON data received for route {route_id}")
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
             logger.error(f"Error updating route {route_id}: {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'error': 'An error occurred while processing your request'}, status=400)
 
     else:
         return JsonResponse({'error': 'Invalid request method. Use POST.'}, status=405)
+
+# @login_required
+# @csrf_exempt
+# def edit_route(request, route_id):
+#     try:
+#         # Fetch the route for the current user
+#         route = get_object_or_404(RouteData, id=route_id, user=request.user)
+#     except RouteData.DoesNotExist:
+#         logger.error(f"Route with id {route_id} does not exist or doesn't belong to the user")
+#         return JsonResponse({'error': 'Route not found or permission denied'}, status=404)
+
+#     if request.method == 'POST':
+#         try:
+#             # Get the new route name from the request body
+#             data = json.loads(request.body)
+#             route_name = data.get('route_name')
+
+#             if not route_name:
+#                 return JsonResponse({'error': 'Route name is required'}, status=400)
+
+#             # Update the route's name
+#             route.name = route_name
+#             route.save()
+
+#             return JsonResponse({'status': 'success', 'message': 'Route updated successfully'})
+
+#         except json.JSONDecodeError:
+#             logger.error(f"Invalid JSON data received for route {route_id}")
+#             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+#         except Exception as e:
+#             logger.error(f"Error updating route {route_id}: {str(e)}")
+#             return JsonResponse({'error': str(e)}, status=400)
+
+#     else:
+#         return JsonResponse({'error': 'Invalid request method. Use POST.'}, status=405)
 
 # Delete Route function
 @login_required
