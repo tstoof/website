@@ -71,26 +71,81 @@ def open_routeplanner(request):
     return render(request, 'frontend/open_routeplanner.html')
 
 
-@csrf_exempt
+# @csrf_exempt
+# def receive_coordinates(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)  # Parse the incoming JSON data
+#             marker1_lat = data.get('marker1').get('lat')
+#             marker1_lng = data.get('marker1').get('lng')
+#             marker2_lat = data.get('marker2').get('lat')
+#             marker2_lng = data.get('marker2').get('lng')
+
+#             coord1 = (marker1_lng, marker1_lat)
+#             coord2 = (marker2_lng, marker2_lat)
+#             route = plan_route(coord1, coord2)
+#             # Store in the session
+#             request.session["route"] = route
+
+#             return JsonResponse({"status": "success", "line_data": route, "route":request.session["route"]})
+#         except Exception as e:
+#             print(f"Error in POST: {e}")  # Debugging line
+#             return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect  # Use csrf_protect if necessary
+import json
+
+@csrf_protect  # Ensures CSRF protection for POST requests
 def receive_coordinates(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # Parse the incoming JSON data
-            marker1_lat = data.get('marker1').get('lat')
-            marker1_lng = data.get('marker1').get('lng')
-            marker2_lat = data.get('marker2').get('lat')
-            marker2_lng = data.get('marker2').get('lng')
+            # Parse and validate the incoming JSON data
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                return JsonResponse({"status": "error", "message": "Invalid JSON format."}, status=400)
 
+            # Validate required fields exist
+            if 'marker1' not in data or 'marker2' not in data:
+                return JsonResponse({"status": "error", "message": "Missing required coordinates."}, status=400)
+
+            # Extract coordinates
+            marker1 = data['marker1']
+            marker2 = data['marker2']
+            
+            if not all(key in marker1 and key in marker2 for key in ['lat', 'lng']):
+                return JsonResponse({"status": "error", "message": "Invalid data structure for coordinates."}, status=400)
+
+            # Validate that latitudes and longitudes are valid numbers and within the correct range
+            try:
+                marker1_lat = float(marker1['lat'])
+                marker1_lng = float(marker1['lng'])
+                marker2_lat = float(marker2['lat'])
+                marker2_lng = float(marker2['lng'])
+            except (ValueError, TypeError):
+                return JsonResponse({"status": "error", "message": "Coordinates must be valid numbers."}, status=400)
+
+            if not (-90 <= marker1_lat <= 90) or not (-180 <= marker1_lng <= 180):
+                return JsonResponse({"status": "error", "message": "Invalid latitude or longitude for marker 1."}, status=400)
+            if not (-90 <= marker2_lat <= 90) or not (-180 <= marker2_lng <= 180):
+                return JsonResponse({"status": "error", "message": "Invalid latitude or longitude for marker 2."}, status=400)
+
+            # Process the coordinates and plan the route
             coord1 = (marker1_lng, marker1_lat)
             coord2 = (marker2_lng, marker2_lat)
-            route = plan_route(coord1, coord2)
-            # Store in the session
+            route = plan_route(coord1, coord2)  # Assuming 'plan_route' is a trusted function
+
+            # Store the route in the session (validate if necessary)
             request.session["route"] = route
 
-            return JsonResponse({"status": "success", "line_data": route, "route":request.session["route"]})
+            return JsonResponse({"status": "success", "line_data": route, "route": request.session["route"]})
+
         except Exception as e:
-            print(f"Error in POST: {e}")  # Debugging line
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+            # Log the exception securely and avoid exposing details
+            logger.error(f"Error processing coordinates: {str(e)}")
+            return JsonResponse({"status": "error", "message": "An unexpected error occurred."}, status=500)
+
 
 
 # Personal homepage view

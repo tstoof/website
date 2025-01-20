@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['planyourhike.onrender.com', 'www.planyourhike.onrender.com']
 # Application definition
 
 INSTALLED_APPS = [
-    'django_csp',
+    # 'django_csp',
     'frontend',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django_csp.middleware.CSPMiddleware',
+    # 'django_csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -186,11 +186,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # settings.py
 
-CSP_DEFAULT_SRC = ("'self'",)  # Only allow content from the same domain
-CSP_SCRIPT_SRC = ("'self'",)  # Allow scripts only from the same domain
-CSP_STYLE_SRC = ("'self'",)  # Allow styles only from the same domain
-CSP_IMG_SRC = ("'self'",)  # Allow images only from the same domain
-CSP_FONT_SRC = ("'self'",)  # Allow fonts only from the same domain
-CSP_CONNECT_SRC = ("'self'",)  # Allow AJAX/Fetch requests only to the same domain
-CSP_OBJECT_SRC = ("'none'",)  # Disallow embedding of plugins and other objects
-CSP_FRAME_SRC = ("'none'",)  # Disallow embedding the site in frames or iframes
+# CSP_DEFAULT_SRC = ("'self'",)  # Only allow content from the same domain
+# CSP_SCRIPT_SRC = ("'self'",)  # Allow scripts only from the same domain
+# CSP_STYLE_SRC = ("'self'",)  # Allow styles only from the same domain
+# CSP_IMG_SRC = ("'self'",)  # Allow images only from the same domain
+# CSP_FONT_SRC = ("'self'",)  # Allow fonts only from the same domain
+# CSP_CONNECT_SRC = ("'self'",)  # Allow AJAX/Fetch requests only to the same domain
+# CSP_OBJECT_SRC = ("'none'",)  # Disallow embedding of plugins and other objects
+# CSP_FRAME_SRC = ("'none'",)  # Disallow embedding the site in frames or iframes
