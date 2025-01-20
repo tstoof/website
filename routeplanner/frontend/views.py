@@ -194,15 +194,15 @@ def load_routes(request):
     if request.method == 'GET':
         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
-        print(routes)
         route_list = []
         for route in routes:
             print(route)
             try:
                 decrypted_data = cipher_suite.decrypt(b64decode(route.data)).decode('utf-8')
+                decrypted_name = cipher_suite.decrypt(b64decode(route.name)).decode('utf-8')
                 route_list.append({
                     'id': route.id,
-                    'name': route.name,
+                    'name': json.loads(decrypted_name),
                     'data': json.loads(decrypted_data),
                     'created_at': route.created_at
                 })
@@ -232,12 +232,13 @@ def save_route(request):
             cipher_suite = Fernet(settings.ENCRYPTION_KEY)
             # Encrypt the route data
             encrypted_data = cipher_suite.encrypt(route_data.encode())
-
+            encrypted_name = cipher_suite.encrypt(route_name.encode())
             # Encode the encrypted data in Base64 for JSON compatibility
             encrypted_data_base64 = b64encode(encrypted_data).decode('utf-8')
+            encrypted_name_base64 = b64encode(encrypted_name).decode('utf-8')
             
             # Create and save the new route
-            route = RouteData(user=request.user, name=route_name, data=encrypted_data_base64)
+            route = RouteData(user=request.user, name=encrypted_name_base64, data=encrypted_data_base64)
             route.save()
 
             return JsonResponse({'message': 'Route saved successfully!'}, status=200)
