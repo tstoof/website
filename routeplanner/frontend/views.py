@@ -191,19 +191,42 @@ def signup_view(request):
 
 
 
+# @login_required
+# def load_routes(request):
+#     if request.method == 'GET':
+#         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
+#         routes = RouteData.objects.filter(user=request.user)
+#         route_list = [
+#             {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(b64decode(route.data)).decode('utf-8'), 'created_at': route.created_at}
+#             for route in routes
+#         ]
+#         return JsonResponse({'routes': route_list})
+
+#     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
 @login_required
 def load_routes(request):
     if request.method == 'GET':
         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
         routes = RouteData.objects.filter(user=request.user)
-        route_list = [
-            {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(b64decode(route.data)).decode('utf-8'), 'created_at': route.created_at}
-            for route in routes
-        ]
+        
+        route_list = []
+        for route in routes:
+            try:
+                decrypted_data = cipher_suite.decrypt(b64decode(route.data)).decode('utf-8')
+                route_list.append({
+                    'id': route.id,
+                    'name': route.name,
+                    'data': decrypted_data,
+                    'created_at': route.created_at
+                })
+            except Exception as e:
+                logger.error(f"Decryption failed for route {route.id}: {str(e)}")
+        
         return JsonResponse({'routes': route_list})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 from base64 import b64encode, b64decode
 from cryptography.fernet import Fernet
