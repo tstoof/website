@@ -117,9 +117,9 @@ def receive_coordinates(request):
             route = plan_route(coord1, coord2)  # Assuming 'plan_route' is a trusted function
 
             # Store the route in the session (validate if necessary)
-            request.session["route"] = route
+            # request.session["route"] = route
 
-            return JsonResponse({"status": "success", "line_data": route, "route": request.session["route"]})
+            return JsonResponse({"status": "success", "line_data": route, "route": route})
 
         except Exception as e:
             # Log the exception securely and avoid exposing details
@@ -187,22 +187,6 @@ def signup_view(request):
         'secret_question_form': secret_question_form,
     })
 
-
-
-
-
-# @login_required
-# def load_routes(request):
-#     if request.method == 'GET':
-#         cipher_suite = Fernet(settings.ENCRYPTION_KEY)
-#         routes = RouteData.objects.filter(user=request.user)
-#         route_list = [
-#             {'id': route.id, 'name': route.name, 'data': cipher_suite.decrypt(b64decode(route.data)).decode('utf-8'), 'created_at': route.created_at}
-#             for route in routes
-#         ]
-#         return JsonResponse({'routes': route_list})
-
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 @login_required
