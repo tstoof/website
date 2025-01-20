@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['planyourhike.onrender.com', 'www.planyourhike.onrender.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'django_csp',
     'frontend',
     'django.contrib.admin',
     'django.contrib.auth',
